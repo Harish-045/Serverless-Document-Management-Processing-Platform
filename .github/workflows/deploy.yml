@@ -1,0 +1,33 @@
+name: Test EC2 Connection
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test SSH Connection
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Connect to EC2
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "================================"
+            echo "Connected to EC2 successfully!"
+            echo "================================"
+
+            echo "Current user:"
+            whoami
+
+            echo "Current directory:"
+            pwd
+
+            echo "Docker version:"
+            docker --version
+
+            echo "Running containers:"
+            docker ps

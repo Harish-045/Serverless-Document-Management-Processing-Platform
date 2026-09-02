@@ -1,0 +1,716 @@
+/* ==========================================================
+   GLOBAL
+   ========================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:
+        linear-gradient(
+                135deg,
+                #eef2ff,
+                #f8fafc
+        );
+
+    min-height: 100vh;
+
+    color: #1e293b;
+}
+
+
+/* ==========================================================
+   CONTAINER
+   ========================================================== */
+
+.container {
+    width: 90%;
+
+    max-width: 1100px;
+
+    margin:
+        40px
+        auto;
+}
+
+
+/* ==========================================================
+   HEADER
+   ========================================================== */
+
+header {
+    text-align: center;
+
+    margin-bottom: 30px;
+}
+
+header h1 {
+    margin-bottom: 10px;
+
+    font-size: 36px;
+
+    color: #1e3a8a;
+}
+
+header p {
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 16px;
+}
+
+
+/* ==========================================================
+   CARDS
+   ========================================================== */
+
+.upload-card,
+.documents-card {
+    background: white;
+
+    border-radius: 16px;
+
+    padding: 25px;
+
+    margin-bottom: 25px;
+
+    box-shadow:
+        0 10px 30px
+        rgba(
+            15,
+            23,
+            42,
+            0.08
+        );
+}
+
+.upload-card h2,
+.documents-card h2 {
+    margin-top: 0;
+
+    color: #1e293b;
+}
+
+
+/* ==========================================================
+   FILE INPUT
+   ========================================================== */
+
+input[type="file"] {
+    width: 100%;
+
+    padding: 12px;
+
+    border:
+        1px solid
+        #cbd5e1;
+
+    border-radius: 8px;
+
+    background: #f8fafc;
+
+    margin-bottom: 15px;
+}
+
+
+/* ==========================================================
+   BUTTONS
+   ========================================================== */
+
+button {
+    border: none;
+
+    border-radius: 8px;
+
+    padding:
+        10px
+        16px;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    transition:
+        transform 0.15s ease,
+        opacity 0.15s ease;
+}
+
+button:hover {
+    transform:
+        translateY(-1px);
+}
+
+button:disabled {
+    opacity: 0.6;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+
+/* ==========================================================
+   UPLOAD BUTTON
+   ========================================================== */
+
+#uploadButton {
+    background: #2563eb;
+
+    color: white;
+
+    width: 100%;
+
+    padding: 13px;
+
+    font-size: 15px;
+}
+
+
+/* ==========================================================
+   UPLOAD STATUS
+   ========================================================== */
+
+#uploadStatus {
+    margin-top: 15px;
+
+    min-height: 22px;
+}
+
+.success {
+    color: #15803d;
+
+    font-weight: 600;
+}
+
+.error {
+    color: #dc2626;
+
+    font-weight: 600;
+}
+
+
+/* ==========================================================
+   DOCUMENT HEADER
+   ========================================================== */
+
+.documents-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 20px;
+}
+
+.documents-header h2 {
+    margin-bottom: 5px;
+}
+
+.documents-header p {
+    margin: 0;
+
+    color: #64748b;
+}
+
+
+/* ==========================================================
+   REFRESH BUTTON
+   ========================================================== */
+
+.refresh-button {
+    background: #0f172a;
+
+    color: white;
+}
+
+
+/* ==========================================================
+   DOCUMENT LIST
+   ========================================================== */
+
+#documentsContainer {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 15px;
+}
+
+
+/* ==========================================================
+   DOCUMENT CARD
+   ========================================================== */
+
+.document-card {
+    border:
+        1px solid
+        #e2e8f0;
+
+    border-radius: 12px;
+
+    padding: 18px;
+
+    background: #f8fafc;
+
+    transition:
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.document-card:hover {
+    box-shadow:
+        0 5px 20px
+        rgba(
+            15,
+            23,
+            42,
+            0.08
+        );
+
+    transform:
+        translateY(-2px);
+}
+
+
+/* ==========================================================
+   DOCUMENT INFO
+   ========================================================== */
+
+.document-info {
+    margin-bottom: 15px;
+}
+
+.document-name {
+    font-size: 18px;
+
+    font-weight: 700;
+
+    color: #1e293b;
+
+    margin-bottom: 8px;
+
+    word-break: break-word;
+}
+
+.document-meta {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+    color: #64748b;
+
+    font-size: 13px;
+}
+
+.document-meta span {
+    background: white;
+
+    padding:
+        5px
+        9px;
+
+    border-radius: 6px;
+
+    border:
+        1px solid
+        #e2e8f0;
+}
+
+
+/* ==========================================================
+   STATUS BADGE
+   ========================================================== */
+
+.status-badge {
+    display: inline-block;
+
+    margin-top: 10px;
+
+    padding:
+        5px
+        10px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    background: #dbeafe;
+
+    color: #1d4ed8;
+}
+
+
+/* ==========================================================
+   DOCUMENT ACTIONS
+   ========================================================== */
+
+.document-actions {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+}
+
+.download-button {
+    background: #2563eb;
+
+    color: white;
+}
+
+.edit-button {
+    background: #7c3aed;
+
+    color: white;
+}
+
+.delete-button {
+    background: #dc2626;
+
+    color: white;
+}
+
+
+/* ==========================================================
+   LOADING
+   ========================================================== */
+
+.loading {
+    text-align: center;
+
+    color: #64748b;
+
+    padding: 30px;
+}
+
+
+/* ==========================================================
+   MODAL OVERLAY
+   ========================================================== */
+
+.modal-overlay {
+    position: fixed;
+
+    inset: 0;
+
+    background:
+        rgba(
+            15,
+            23,
+            42,
+            0.55
+        );
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    z-index: 1000;
+}
+
+
+/* ==========================================================
+   MODAL
+   ========================================================== */
+
+.modal {
+    width: 100%;
+
+    max-width: 650px;
+
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    background: white;
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 25px 60px
+        rgba(
+            0,
+            0,
+            0,
+            0.25
+        );
+}
+
+
+/* ==========================================================
+   MODAL HEADER
+   ========================================================== */
+
+.modal-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding:
+        20px
+        24px;
+
+    border-bottom:
+        1px solid
+        #e2e8f0;
+}
+
+.modal-header h2 {
+    margin: 0;
+
+    color: #1e293b;
+}
+
+.close-button {
+    background: transparent;
+
+    color: #64748b;
+
+    font-size: 28px;
+
+    padding: 0 8px;
+}
+
+
+/* ==========================================================
+   MODAL BODY
+   ========================================================== */
+
+.modal-body {
+    padding:
+        24px;
+}
+
+.modal-body label {
+    display: block;
+
+    font-weight: 700;
+
+    margin-bottom: 8px;
+
+    color: #334155;
+}
+
+.modal-body input[type="text"] {
+    width: 100%;
+
+    padding: 12px;
+
+    border:
+        1px solid
+        #cbd5e1;
+
+    border-radius: 8px;
+
+    font-size: 15px;
+
+    outline: none;
+}
+
+.modal-body input[type="text"]:focus {
+    border-color: #2563eb;
+}
+
+
+/* ==========================================================
+   HELP TEXT
+   ========================================================== */
+
+.field-help {
+    margin-top: 7px;
+
+    margin-bottom: 20px;
+
+    font-size: 13px;
+
+    color: #64748b;
+
+    line-height: 1.5;
+}
+
+
+/* ==========================================================
+   REPLACE SECTION
+   ========================================================== */
+
+.replace-section {
+    margin-top: 10px;
+
+    padding-top: 20px;
+
+    border-top:
+        1px solid
+        #e2e8f0;
+}
+
+
+/* ==========================================================
+   REPLACEMENT INFO
+   ========================================================== */
+
+.replacement-info {
+    margin-top: 5px;
+
+    margin-bottom: 15px;
+
+    color: #475569;
+
+    font-size: 13px;
+}
+
+
+/* ==========================================================
+   TEXT EDITOR
+   ========================================================== */
+
+.text-editor-section {
+    display: none;
+
+    margin-top: 20px;
+
+    padding-top: 20px;
+
+    border-top:
+        1px solid
+        #e2e8f0;
+}
+
+#textEditor {
+    width: 100%;
+
+    min-height: 260px;
+
+    resize: vertical;
+
+    padding: 14px;
+
+    border:
+        1px solid
+        #cbd5e1;
+
+    border-radius: 8px;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+
+    background: #0f172a;
+
+    color: #f8fafc;
+
+    outline: none;
+}
+
+#textEditor:focus {
+    border-color: #2563eb;
+}
+
+
+/* ==========================================================
+   EDIT STATUS
+   ========================================================== */
+
+.edit-status {
+    min-height: 24px;
+
+    margin-top: 15px;
+}
+
+
+/* ==========================================================
+   MODAL ACTIONS
+   ========================================================== */
+
+.modal-actions {
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    padding:
+        18px
+        24px;
+
+    border-top:
+        1px solid
+        #e2e8f0;
+}
+
+.cancel-button {
+    background: #e2e8f0;
+
+    color: #334155;
+}
+
+.update-button {
+    background: #2563eb;
+
+    color: white;
+}
+
+
+/* ==========================================================
+   MOBILE
+   ========================================================== */
+
+@media (max-width: 650px) {
+
+    .container {
+        width: 94%;
+
+        margin-top: 20px;
+    }
+
+    header h1 {
+        font-size: 28px;
+    }
+
+    .documents-header {
+        align-items: flex-start;
+
+        gap: 15px;
+
+        flex-direction: column;
+    }
+
+    .document-actions {
+        flex-direction: column;
+    }
+
+    .document-actions button {
+        width: 100%;
+    }
+
+    .modal {
+        max-height: 95vh;
+    }
+
+}

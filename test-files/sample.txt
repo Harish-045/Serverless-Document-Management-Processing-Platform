@@ -1,0 +1,3 @@
+Hello from Serverless Document Processing Platform!
+
+This is our first document uploaded to Amazon S3.

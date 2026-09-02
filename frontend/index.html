@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Cloud Document Platform</title>
+
+    <link
+            rel="stylesheet"
+            href="style.css"
+    >
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- ===================================================== -->
+    <!-- HEADER -->
+    <!-- ===================================================== -->
+
+    <header>
+
+        <h1>
+            Cloud Document Platform
+        </h1>
+
+        <p>
+            Upload, manage and update your documents securely.
+        </p>
+
+    </header>
+
+
+    <!-- ===================================================== -->
+    <!-- UPLOAD -->
+    <!-- ===================================================== -->
+
+    <section class="upload-card">
+
+        <h2>
+            Upload Document
+        </h2>
+
+        <input
+                type="file"
+                id="fileInput"
+        >
+
+        <button
+                id="uploadButton"
+                onclick="uploadDocument()"
+        >
+            Upload Document
+        </button>
+
+        <div id="uploadStatus"></div>
+
+    </section>
+
+
+    <!-- ===================================================== -->
+    <!-- DOCUMENTS -->
+    <!-- ===================================================== -->
+
+    <section class="documents-card">
+
+        <div class="documents-header">
+
+            <div>
+
+                <h2>
+                    Documents
+                </h2>
+
+                <p>
+                    Your uploaded documents
+                </p>
+
+            </div>
+
+            <button
+                    onclick="loadDocuments()"
+                    class="refresh-button"
+            >
+                Refresh
+            </button>
+
+        </div>
+
+        <div id="documentsContainer">
+
+            <p class="loading">
+                Loading documents...
+            </p>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- EDIT DOCUMENT MODAL -->
+<!-- ========================================================= -->
+
+<div
+        id="editModal"
+        class="modal-overlay"
+>
+
+    <div class="modal">
+
+        <!-- MODAL HEADER -->
+
+        <div class="modal-header">
+
+            <h2>
+                Edit Document
+            </h2>
+
+            <button
+                    class="close-button"
+                    onclick="closeEditModal()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- MODAL BODY -->
+
+        <div class="modal-body">
+
+            <!-- DOCUMENT ID -->
+
+            <input
+                    type="hidden"
+                    id="editDocumentId"
+            >
+
+
+            <!-- FILE NAME -->
+
+            <label for="editFileName">
+                File Name
+            </label>
+
+            <input
+                    type="text"
+                    id="editFileName"
+                    placeholder="Enter file name"
+            >
+
+            <p class="field-help">
+                Rename the document without changing its contents.
+            </p>
+
+
+            <!-- REPLACE FILE -->
+
+            <div class="replace-section">
+
+                <label for="replaceFile">
+                    Replace File
+                </label>
+
+                <input
+                        type="file"
+                        id="replaceFile"
+                >
+
+                <p class="field-help">
+                    Replace the contents with another file.
+                    This works with PDF, DOCX, XLSX, images,
+                    ZIP, videos, audio and other file types.
+                </p>
+
+                <div
+                        id="replacementInfo"
+                        class="replacement-info"
+                ></div>
+
+            </div>
+
+
+            <!-- TEXT EDITOR -->
+
+            <div
+                    id="textEditorSection"
+                    class="text-editor-section"
+            >
+
+                <label for="textEditor">
+                    Edit Text Content
+                </label>
+
+                <textarea
+                        id="textEditor"
+                        placeholder="Loading file content..."
+                ></textarea>
+
+                <p class="field-help">
+                    Direct editing is available for text-based files.
+                </p>
+
+            </div>
+
+
+            <!-- STATUS -->
+
+            <div
+                    id="editStatus"
+                    class="edit-status"
+            ></div>
+
+        </div>
+
+
+        <!-- MODAL ACTIONS -->
+
+        <div class="modal-actions">
+
+            <button
+                    class="cancel-button"
+                    onclick="closeEditModal()"
+            >
+                Cancel
+            </button>
+
+            <button
+                    class="update-button"
+                    id="updateButton"
+                    onclick="saveDocumentChanges()"
+            >
+                Save Changes
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script src="app.js"></script>
+
+</body>
+
+</html>

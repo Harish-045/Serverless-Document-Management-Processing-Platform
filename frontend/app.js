@@ -49,20 +49,25 @@ const UPDATE_DOCUMENT_API =
 
 
 // ============================================================
-// 3. DOM CONTENT LOADED
+// 3. APPLICATION START
 // ============================================================
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
 
-    console.log("Application started");
+        console.log(
+            "Cloud Document Platform started."
+        );
 
-    checkAuthentication();
+        checkAuthentication();
 
-});
+    }
+);
 
 
 // ============================================================
-// 4. GET CURRENT COGNITO USER
+// 4. GET CURRENT USER
 // ============================================================
 
 function getCurrentUser() {
@@ -73,63 +78,81 @@ function getCurrentUser() {
 
 
 // ============================================================
-// 5. GET ACCESS TOKEN
+// 5. GET COGNITO ACCESS TOKEN
 // ============================================================
 
 function getAccessToken() {
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(
+        function (resolve, reject) {
 
-        const user = getCurrentUser();
+            const user =
+                getCurrentUser();
 
-        if (!user) {
-
-            reject(
-                new Error("User is not logged in.")
-            );
-
-            return;
-        }
-
-        user.getSession(function (error, session) {
-
-            if (error) {
-
-                reject(error);
-
-                return;
-            }
-
-            if (!session || !session.isValid()) {
+            if (!user) {
 
                 reject(
-                    new Error("Login session has expired.")
+                    new Error(
+                        "User is not logged in."
+                    )
                 );
 
                 return;
             }
 
-            const accessToken =
-                session
-                    .getAccessToken()
-                    .getJwtToken();
+            user.getSession(
+                function (error, session) {
 
-            resolve(accessToken);
+                    if (error) {
 
-        });
+                        reject(error);
 
-    });
+                        return;
+
+                    }
+
+                    if (
+                        !session ||
+                        !session.isValid()
+                    ) {
+
+                        reject(
+                            new Error(
+                                "Login session has expired."
+                            )
+                        );
+
+                        return;
+
+                    }
+
+                    const token =
+                        session
+                            .getAccessToken()
+                            .getJwtToken();
+
+                    resolve(token);
+
+                }
+            );
+
+        }
+    );
 
 }
 
 
 // ============================================================
-// 6. AUTHENTICATED FETCH
+// 6. AUTHENTICATED API REQUEST
 // ============================================================
 
-async function authenticatedFetch(url, options = {}) {
+async function authenticatedFetch(
+    url,
+    options = {}
+) {
 
-    const token = await getAccessToken();
+    const token =
+        await getAccessToken();
 
     const requestOptions = {
         ...options
@@ -163,142 +186,40 @@ function checkAuthentication() {
 
     if (!user) {
 
+        console.log(
+            "No logged-in user."
+        );
+
         showLogin();
 
         return;
+
     }
 
-    user.getSession(function (error, session) {
+    user.getSession(
+        function (error, session) {
 
-        if (
-            error ||
-            !session ||
-            !session.isValid()
-        ) {
-
-            console.log(
-                "No valid session."
-            );
-
-            showLogin();
-
-            return;
-        }
-
-        console.log(
-            "User already logged in."
-        );
-
-        showApplication(user);
-
-    });
-
-}
-
-
-// ============================================================
-// 8. LOGIN USER
-// ============================================================
-
-function loginUser() {
-
-    const emailElement =
-        document.getElementById("loginEmail");
-
-    const passwordElement =
-        document.getElementById("loginPassword");
-
-    if (!emailElement || !passwordElement) {
-
-        alert(
-            "Login fields not found."
-        );
-
-        return;
-    }
-
-    const email =
-        emailElement.value.trim();
-
-    const password =
-        passwordElement.value;
-
-    if (!email || !password) {
-
-        alert(
-            "Please enter email and password."
-        );
-
-        return;
-    }
-
-    const authenticationData = {
-
-        Username: email,
-
-        Password: password
-
-    };
-
-    const authenticationDetails =
-        new AmazonCognitoIdentity.AuthenticationDetails(
-            authenticationData
-        );
-
-    const userData = {
-
-        Username: email,
-
-        Pool: userPool
-
-    };
-
-    const cognitoUser =
-        new AmazonCognitoIdentity.CognitoUser(
-            userData
-        );
-
-    cognitoUser.authenticateUser(
-        authenticationDetails,
-        {
-
-            onSuccess: function (session) {
+            if (
+                error ||
+                !session ||
+                !session.isValid()
+            ) {
 
                 console.log(
-                    "Login successful."
+                    "No valid Cognito session."
                 );
 
-                console.log(
-                    "Access token received."
-                );
+                showLogin();
 
-                showApplication(
-                    cognitoUser
-                );
-
-            },
-
-            onFailure: function (error) {
-
-                console.error(
-                    "Login failed:",
-                    error
-                );
-
-                alert(
-                    error.message ||
-                    "Login failed."
-                );
-
-            },
-
-            newPasswordRequired: function () {
-
-                alert(
-                    "A new password is required."
-                );
+                return;
 
             }
+
+            console.log(
+                "Valid Cognito session found."
+            );
+
+            showApplication(user);
 
         }
     );
@@ -307,31 +228,39 @@ function loginUser() {
 
 
 // ============================================================
-// 9. SIGN UP USER
+// 8. LOGIN
 // ============================================================
 
-function signupUser() {
+function loginUser() {
 
-    const emailElement =
-        document.getElementById("signupEmail");
+    const emailInput =
+        document.getElementById(
+            "loginEmail"
+        );
 
-    const passwordElement =
-        document.getElementById("signupPassword");
+    const passwordInput =
+        document.getElementById(
+            "loginPassword"
+        );
 
-    if (!emailElement || !passwordElement) {
+    if (
+        !emailInput ||
+        !passwordInput
+    ) {
 
         alert(
-            "Signup fields not found."
+            "Login fields not found."
         );
 
         return;
+
     }
 
     const email =
-        emailElement.value.trim();
+        emailInput.value.trim();
 
     const password =
-        passwordElement.value;
+        passwordInput.value;
 
     if (!email || !password) {
 
@@ -340,6 +269,123 @@ function signupUser() {
         );
 
         return;
+
+    }
+
+    const authenticationDetails =
+        new AmazonCognitoIdentity.AuthenticationDetails(
+            {
+                Username: email,
+                Password: password
+            }
+        );
+
+    const cognitoUser =
+        new AmazonCognitoIdentity.CognitoUser(
+            {
+                Username: email,
+                Pool: userPool
+            }
+        );
+
+    console.log(
+        "Logging in..."
+    );
+
+    cognitoUser.authenticateUser(
+        authenticationDetails,
+        {
+
+            onSuccess:
+                function (session) {
+
+                    console.log(
+                        "Login successful."
+                    );
+
+                    console.log(
+                        "Access token received."
+                    );
+
+                    showApplication(
+                        cognitoUser
+                    );
+
+                },
+
+            onFailure:
+                function (error) {
+
+                    console.error(
+                        "Login failed:",
+                        error
+                    );
+
+                    alert(
+                        error.message ||
+                        "Login failed."
+                    );
+
+                },
+
+            newPasswordRequired:
+                function () {
+
+                    alert(
+                        "A new password is required."
+                    );
+
+                }
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// 9. SIGN UP
+// ============================================================
+
+function signupUser() {
+
+    const emailInput =
+        document.getElementById(
+            "signupEmail"
+        );
+
+    const passwordInput =
+        document.getElementById(
+            "signupPassword"
+        );
+
+    if (
+        !emailInput ||
+        !passwordInput
+    ) {
+
+        alert(
+            "Signup fields not found."
+        );
+
+        return;
+
+    }
+
+    const email =
+        emailInput.value.trim();
+
+    const password =
+        passwordInput.value;
+
+    if (!email || !password) {
+
+        alert(
+            "Please enter email and password."
+        );
+
+        return;
+
     }
 
     if (password.length < 8) {
@@ -349,9 +395,8 @@ function signupUser() {
         );
 
         return;
-    }
 
-    const attributeList = [];
+    }
 
     const emailAttribute =
         new AmazonCognitoIdentity.CognitoUserAttribute(
@@ -361,14 +406,14 @@ function signupUser() {
             }
         );
 
-    attributeList.push(
-        emailAttribute
+    console.log(
+        "Creating Cognito account..."
     );
 
     userPool.signUp(
         email,
         password,
-        attributeList,
+        [emailAttribute],
         null,
         function (error, result) {
 
@@ -385,6 +430,7 @@ function signupUser() {
                 );
 
                 return;
+
             }
 
             pendingSignupEmail =
@@ -395,7 +441,7 @@ function signupUser() {
             );
 
             alert(
-                "Account created. Please check your email for the verification code."
+                "Account created. Check your email for the verification code."
             );
 
             showVerification();
@@ -407,25 +453,28 @@ function signupUser() {
 
 
 // ============================================================
-// 10. CONFIRM SIGNUP
+// 10. VERIFY EMAIL
 // ============================================================
 
 function confirmSignup() {
 
-    const codeElement =
-        document.getElementById("verificationCode");
+    const codeInput =
+        document.getElementById(
+            "verificationCode"
+        );
 
-    if (!codeElement) {
+    if (!codeInput) {
 
         alert(
-            "Verification code field not found."
+            "Verification field not found."
         );
 
         return;
+
     }
 
     const code =
-        codeElement.value.trim();
+        codeInput.value.trim();
 
     if (!pendingSignupEmail) {
 
@@ -434,6 +483,7 @@ function confirmSignup() {
         );
 
         return;
+
     }
 
     if (!code) {
@@ -443,21 +493,18 @@ function confirmSignup() {
         );
 
         return;
+
     }
-
-    const userData = {
-
-        Username:
-            pendingSignupEmail,
-
-        Pool:
-            userPool
-
-    };
 
     const cognitoUser =
         new AmazonCognitoIdentity.CognitoUser(
-            userData
+            {
+                Username:
+                    pendingSignupEmail,
+
+                Pool:
+                    userPool
+            }
         );
 
     cognitoUser.confirmRegistration(
@@ -478,17 +525,20 @@ function confirmSignup() {
                 );
 
                 return;
+
             }
 
             console.log(
-                "Email verification successful."
+                "Email verified."
             );
 
             alert(
-                "Account verified successfully. You can now login."
+                "Email verified successfully. Please login."
             );
 
             pendingSignupEmail = "";
+
+            codeInput.value = "";
 
             showLogin();
 
@@ -499,64 +549,7 @@ function confirmSignup() {
 
 
 // ============================================================
-// 11. RESEND VERIFICATION CODE
-// ============================================================
-
-function resendVerificationCode() {
-
-    if (!pendingSignupEmail) {
-
-        alert(
-            "Signup email not found."
-        );
-
-        return;
-    }
-
-    const userData = {
-
-        Username:
-            pendingSignupEmail,
-
-        Pool:
-            userPool
-
-    };
-
-    const cognitoUser =
-        new AmazonCognitoIdentity.CognitoUser(
-            userData
-        );
-
-    cognitoUser.resendConfirmationCode(
-        function (error, result) {
-
-            if (error) {
-
-                console.error(
-                    error
-                );
-
-                alert(
-                    error.message ||
-                    "Could not resend verification code."
-                );
-
-                return;
-            }
-
-            alert(
-                "A new verification code has been sent."
-            );
-
-        }
-    );
-
-}
-
-
-// ============================================================
-// 12. SHOW LOGIN
+// 11. SHOW LOGIN
 // ============================================================
 
 function showLogin() {
@@ -625,7 +618,7 @@ function showLogin() {
 
 
 // ============================================================
-// 13. SHOW SIGNUP
+// 12. SHOW SIGNUP
 // ============================================================
 
 function showSignup() {
@@ -670,7 +663,7 @@ function showSignup() {
 
 
 // ============================================================
-// 14. SHOW VERIFICATION
+// 13. SHOW VERIFICATION
 // ============================================================
 
 function showVerification() {
@@ -715,7 +708,7 @@ function showVerification() {
 
 
 // ============================================================
-// 15. SHOW APPLICATION
+// 14. SHOW MAIN APPLICATION
 // ============================================================
 
 function showApplication(user) {
@@ -752,7 +745,7 @@ function showApplication(user) {
 
 
 // ============================================================
-// 16. DISPLAY LOGGED-IN USER
+// 15. DISPLAY LOGGED-IN USER
 // ============================================================
 
 function displayLoggedInUser() {
@@ -763,6 +756,18 @@ function displayLoggedInUser() {
     if (!user) {
 
         return;
+
+    }
+
+    const userDisplay =
+        document.getElementById(
+            "loggedInUser"
+        );
+
+    if (!userDisplay) {
+
+        return;
+
     }
 
     user.getUserAttributes(
@@ -770,11 +775,17 @@ function displayLoggedInUser() {
 
             if (error) {
 
-                console.log(
-                    "Could not get user attributes."
+                console.error(
+                    "Could not get user attributes:",
+                    error
                 );
 
+                userDisplay.textContent =
+                    "Logged in as: " +
+                    user.getUsername();
+
                 return;
+
             }
 
             let email = "";
@@ -799,18 +810,12 @@ function displayLoggedInUser() {
 
             }
 
-            const userDisplay =
-                document.getElementById(
-                    "loggedInUser"
-                );
-
-            if (userDisplay) {
-
-                userDisplay.textContent =
+            userDisplay.textContent =
+                "Logged in as: " +
+                (
                     email ||
-                    user.getUsername();
-
-            }
+                    user.getUsername()
+                );
 
         }
     );
@@ -819,7 +824,7 @@ function displayLoggedInUser() {
 
 
 // ============================================================
-// 17. LOGOUT
+// 16. LOGOUT
 // ============================================================
 
 function logoutUser() {
@@ -837,13 +842,15 @@ function logoutUser() {
         "User logged out."
     );
 
+    closeEditModal();
+
     showLogin();
 
 }
 
 
 // ============================================================
-// 18. UPLOAD DOCUMENT
+// 17. UPLOAD DOCUMENT
 // ============================================================
 
 async function uploadDocument() {
@@ -853,6 +860,11 @@ async function uploadDocument() {
             "fileInput"
         );
 
+    const uploadStatus =
+        document.getElementById(
+            "uploadStatus"
+        );
+
     if (!fileInput) {
 
         alert(
@@ -860,6 +872,7 @@ async function uploadDocument() {
         );
 
         return;
+
     }
 
     const file =
@@ -872,13 +885,17 @@ async function uploadDocument() {
         );
 
         return;
+
     }
 
     try {
 
-        console.log(
-            "Requesting upload URL..."
-        );
+        if (uploadStatus) {
+
+            uploadStatus.textContent =
+                "Generating secure upload URL...";
+
+        }
 
         const response =
             await authenticatedFetch(
@@ -894,19 +911,30 @@ async function uploadDocument() {
 
                     },
 
-                    body: JSON.stringify({
+                    body:
+                        JSON.stringify(
+                            {
 
-                        fileName:
-                            file.name,
+                                fileName:
+                                    file.name,
 
-                        contentType:
-                            file.type ||
-                            "application/octet-stream"
+                                contentType:
+                                    file.type ||
+                                    "application/octet-stream"
 
-                    })
+                            }
+                        )
 
                 }
             );
+
+        if (response.status === 401) {
+
+            handleUnauthorized();
+
+            return;
+
+        }
 
         if (!response.ok) {
 
@@ -926,15 +954,29 @@ async function uploadDocument() {
             await response.json();
 
         console.log(
-            "Upload URL received:",
-            uploadData
+            "Upload URL generated."
         );
 
-        // ----------------------------------------------------
+        if (!uploadData.uploadUrl) {
+
+            throw new Error(
+                "Upload URL was not returned."
+            );
+
+        }
+
+        if (uploadStatus) {
+
+            uploadStatus.textContent =
+                "Uploading to S3...";
+
+        }
+
+        // ====================================================
+        // DIRECT S3 UPLOAD
         // IMPORTANT:
-        // This request goes DIRECTLY to S3.
-        // Do NOT add Cognito Authorization header here.
-        // ----------------------------------------------------
+        // Do NOT send Cognito Authorization here.
+        // ====================================================
 
         const s3Response =
             await fetch(
@@ -965,11 +1007,24 @@ async function uploadDocument() {
 
         }
 
+        console.log(
+            "S3 upload successful."
+        );
+
+        if (uploadStatus) {
+
+            uploadStatus.textContent =
+                "Upload successful.";
+
+        }
+
         alert(
             "File uploaded successfully."
         );
 
         fileInput.value = "";
+
+        await sleep(3000);
 
         await loadDocuments();
 
@@ -980,6 +1035,13 @@ async function uploadDocument() {
             "Upload error:",
             error
         );
+
+        if (uploadStatus) {
+
+            uploadStatus.textContent =
+                "Upload failed.";
+
+        }
 
         alert(
             "Upload failed: " +
@@ -992,16 +1054,30 @@ async function uploadDocument() {
 
 
 // ============================================================
-// 19. LOAD DOCUMENTS
+// 18. LOAD DOCUMENTS
 // ============================================================
 
 async function loadDocuments() {
 
-    try {
-
-        console.log(
-            "Loading documents..."
+    const container =
+        document.getElementById(
+            "documentsContainer"
         );
+
+    if (!container) {
+
+        console.error(
+            "documentsContainer not found."
+        );
+
+        return;
+
+    }
+
+    container.innerHTML =
+        '<p class="loading">Loading documents...</p>';
+
+    try {
 
         const response =
             await authenticatedFetch(
@@ -1015,17 +1091,10 @@ async function loadDocuments() {
 
         if (response.status === 401) {
 
-            console.log(
-                "Unauthorized. Session may have expired."
-            );
-
-            logoutUser();
-
-            alert(
-                "Your login session has expired. Please login again."
-            );
+            handleUnauthorized();
 
             return;
+
         }
 
         if (!response.ok) {
@@ -1046,7 +1115,7 @@ async function loadDocuments() {
             await response.json();
 
         console.log(
-            "Documents:",
+            "Documents received:",
             documents
         );
 
@@ -1062,17 +1131,12 @@ async function loadDocuments() {
             error
         );
 
-        const documentsList =
-            document.getElementById(
-                "documentsList"
-            );
-
-        if (documentsList) {
-
-            documentsList.innerHTML =
-                "<p>Unable to load documents.</p>";
-
-        }
+        container.innerHTML =
+            `
+            <p>
+                Unable to load documents.
+            </p>
+            `;
 
     }
 
@@ -1080,23 +1144,22 @@ async function loadDocuments() {
 
 
 // ============================================================
-// 20. DISPLAY DOCUMENTS
+// 19. DISPLAY DOCUMENTS
 // ============================================================
 
-function displayDocuments(documents) {
+function displayDocuments(
+    documents
+) {
 
     const container =
         document.getElementById(
-            "documentsList"
+            "documentsContainer"
         );
 
     if (!container) {
 
-        console.warn(
-            "documentsList element not found."
-        );
-
         return;
+
     }
 
     container.innerHTML = "";
@@ -1107,18 +1170,22 @@ function displayDocuments(documents) {
     ) {
 
         container.innerHTML =
-            "<p>No documents found.</p>";
+            `
+            <p>
+                No documents found.
+            </p>
+            `;
 
         return;
 
     }
 
     documents.forEach(
-        function (document) {
+        function (doc) {
 
             const card =
                 createDocumentCard(
-                    document
+                    doc
                 );
 
             container.appendChild(
@@ -1132,41 +1199,55 @@ function displayDocuments(documents) {
 
 
 // ============================================================
-// 21. CREATE DOCUMENT CARD
+// 20. CREATE DOCUMENT CARD
 // ============================================================
 
-function createDocumentCard(document) {
+function createDocumentCard(
+    doc
+) {
 
     const card =
-        window.document.createElement(
+        document.createElement(
             "div"
         );
 
     card.className =
         "document-card";
 
-    const fileName =
-        document.fileName ||
-        "Unnamed file";
-
     const documentId =
-        document.documentId ||
-        "";
+        doc.documentId || "";
 
-    const status =
-        document.status ||
-        "UNKNOWN";
+    const fileName =
+        doc.fileName ||
+        "Unnamed document";
 
     const fileType =
-        document.fileType ||
+        doc.fileType ||
         "Unknown";
+
+    const status =
+        doc.status ||
+        "UNKNOWN";
 
     const fileSize =
         formatFileSize(
-            document.fileSize
+            doc.fileSize
         );
 
-    card.innerHTML = `
+    const escapedId =
+        escapeJs(documentId);
+
+    const escapedName =
+        escapeJs(fileName);
+
+    const textFile =
+        isTextFile(
+            fileName,
+            fileType
+        );
+
+    card.innerHTML =
+        `
 
         <div class="document-info">
 
@@ -1175,25 +1256,23 @@ function createDocumentCard(document) {
             </h3>
 
             <p>
-                ID:
+                <strong>ID:</strong>
                 ${escapeHtml(documentId)}
             </p>
 
             <p>
-                Type:
+                <strong>Type:</strong>
                 ${escapeHtml(fileType)}
             </p>
 
             <p>
-                Size:
+                <strong>Size:</strong>
                 ${escapeHtml(fileSize)}
             </p>
 
             <p>
-                Status:
-                <strong>
-                    ${escapeHtml(status)}
-                </strong>
+                <strong>Status:</strong>
+                ${escapeHtml(status)}
             </p>
 
         </div>
@@ -1201,32 +1280,48 @@ function createDocumentCard(document) {
         <div class="document-actions">
 
             <button
-                onclick="downloadDocument('${escapeJs(documentId)}')"
+                onclick="downloadDocument('${escapedId}')"
             >
                 Download
             </button>
 
+            ${
+                textFile
+                    ?
+                    `
+                    <button
+                        onclick="editTextDocument(
+                            '${escapedId}',
+                            '${escapedName}',
+                            '${escapeJs(fileType)}'
+                        )"
+                    >
+                        Edit Text
+                    </button>
+                    `
+                    :
+                    ""
+            }
+
             <button
-                onclick="renameDocument('${escapeJs(documentId)}', '${escapeJs(fileName)}')"
+                onclick="openEditModal(
+                    '${escapedId}',
+                    '${escapedName}',
+                    '${escapeJs(fileType)}'
+                )"
             >
-                Rename
+                Edit
             </button>
 
             <button
-                onclick="replaceDocument('${escapeJs(documentId)}')"
-            >
-                Replace
-            </button>
-
-            <button
-                onclick="deleteDocument('${escapeJs(documentId)}')"
+                onclick="deleteDocument('${escapedId}')"
             >
                 Delete
             </button>
 
         </div>
 
-    `;
+        `;
 
     return card;
 
@@ -1234,7 +1329,7 @@ function createDocumentCard(document) {
 
 
 // ============================================================
-// 22. DOWNLOAD DOCUMENT
+// 21. DOWNLOAD DOCUMENT
 // ============================================================
 
 async function downloadDocument(
@@ -1242,10 +1337,6 @@ async function downloadDocument(
 ) {
 
     try {
-
-        console.log(
-            "Requesting download URL..."
-        );
 
         const response =
             await authenticatedFetch(
@@ -1264,11 +1355,7 @@ async function downloadDocument(
 
         if (response.status === 401) {
 
-            logoutUser();
-
-            alert(
-                "Your login session has expired."
-            );
+            handleUnauthorized();
 
             return;
 
@@ -1290,7 +1377,7 @@ async function downloadDocument(
                 await response.text();
 
             throw new Error(
-                "Download URL request failed: " +
+                "Download request failed: " +
                 response.status +
                 " " +
                 errorText
@@ -1301,14 +1388,10 @@ async function downloadDocument(
         const data =
             await response.json();
 
-        console.log(
-            "Download URL received."
-        );
-
         if (!data.downloadUrl) {
 
             throw new Error(
-                "Download URL not returned by server."
+                "Download URL was not returned."
             );
 
         }
@@ -1337,7 +1420,7 @@ async function downloadDocument(
 
 
 // ============================================================
-// 23. DELETE DOCUMENT
+// 22. DELETE DOCUMENT
 // ============================================================
 
 async function deleteDocument(
@@ -1373,11 +1456,7 @@ async function deleteDocument(
 
         if (response.status === 401) {
 
-            logoutUser();
-
-            alert(
-                "Your login session has expired."
-            );
+            handleUnauthorized();
 
             return;
 
@@ -1432,422 +1511,13 @@ async function deleteDocument(
 
 
 // ============================================================
-// 24. RENAME DOCUMENT
+// 23. OPEN EDIT MODAL
 // ============================================================
 
-async function renameDocument(
-    documentId,
-    currentFileName
-) {
-
-    const newFileName =
-        prompt(
-            "Enter new file name:",
-            currentFileName
-        );
-
-    if (
-        newFileName === null
-    ) {
-
-        return;
-
-    }
-
-    const trimmedName =
-        newFileName.trim();
-
-    if (!trimmedName) {
-
-        alert(
-            "File name cannot be empty."
-        );
-
-        return;
-
-    }
-
-    try {
-
-        const response =
-            await authenticatedFetch(
-                UPDATE_DOCUMENT_API +
-                "/" +
-                encodeURIComponent(
-                    documentId
-                ),
-                {
-
-                    method: "PUT",
-
-                    headers: {
-
-                        "Content-Type":
-                            "application/json"
-
-                    },
-
-                    body: JSON.stringify({
-
-                        fileName:
-                            trimmedName
-
-                    })
-
-                }
-            );
-
-        if (response.status === 401) {
-
-            logoutUser();
-
-            alert(
-                "Your login session has expired."
-            );
-
-            return;
-
-        }
-
-        if (response.status === 403) {
-
-            alert(
-                "You are not authorized to rename this document."
-            );
-
-            return;
-
-        }
-
-        if (!response.ok) {
-
-            const errorText =
-                await response.text();
-
-            throw new Error(
-                "Rename failed: " +
-                response.status +
-                " " +
-                errorText
-            );
-
-        }
-
-        alert(
-            "Document renamed successfully."
-        );
-
-        await loadDocuments();
-
-    }
-    catch (error) {
-
-        console.error(
-            "Rename error:",
-            error
-        );
-
-        alert(
-            "Rename failed: " +
-            error.message
-        );
-
-    }
-
-}
-
-
-// ============================================================
-// 25. REPLACE DOCUMENT
-// ============================================================
-
-async function replaceDocument(
-    documentId
-) {
-
-    const input =
-        window.document.createElement(
-            "input"
-        );
-
-    input.type =
-        "file";
-
-    input.accept =
-        "*/*";
-
-    input.onchange =
-        async function () {
-
-            const file =
-                input.files[0];
-
-            if (!file) {
-
-                return;
-
-            }
-
-            try {
-
-                console.log(
-                    "Requesting replacement URL..."
-                );
-
-                const response =
-                    await authenticatedFetch(
-                        UPDATE_DOCUMENT_API +
-                        "/" +
-                        encodeURIComponent(
-                            documentId
-                        ) +
-                        "/update-url",
-                        {
-
-                            method: "POST",
-
-                            headers: {
-
-                                "Content-Type":
-                                    "application/json"
-
-                            },
-
-                            body: JSON.stringify({
-
-                                contentType:
-                                    file.type ||
-                                    "application/octet-stream"
-
-                            })
-
-                        }
-                    );
-
-                if (
-                    response.status ===
-                    401
-                ) {
-
-                    logoutUser();
-
-                    alert(
-                        "Your login session has expired."
-                    );
-
-                    return;
-
-                }
-
-                if (
-                    response.status ===
-                    403
-                ) {
-
-                    alert(
-                        "You are not authorized to replace this document."
-                    );
-
-                    return;
-
-                }
-
-                if (!response.ok) {
-
-                    const errorText =
-                        await response.text();
-
-                    throw new Error(
-                        "Replacement URL request failed: " +
-                        response.status +
-                        " " +
-                        errorText
-                    );
-
-                }
-
-                const data =
-                    await response.json();
-
-                console.log(
-                    "Replacement URL received."
-                );
-
-                if (!data.uploadUrl) {
-
-                    throw new Error(
-                        "Replacement upload URL was not returned."
-                    );
-
-                }
-
-                // ------------------------------------------------
-                // IMPORTANT:
-                // Direct upload to S3.
-                // No Cognito Authorization header.
-                // ------------------------------------------------
-
-                const uploadResponse =
-                    await fetch(
-                        data.uploadUrl,
-                        {
-
-                            method: "PUT",
-
-                            headers: {
-
-                                "Content-Type":
-                                    file.type ||
-                                    "application/octet-stream"
-
-                            },
-
-                            body: file
-
-                        }
-                    );
-
-                if (!uploadResponse.ok) {
-
-                    throw new Error(
-                        "S3 replacement upload failed: " +
-                        uploadResponse.status
-                    );
-
-                }
-
-                alert(
-                    "Document replaced successfully."
-                );
-
-                // Give S3 -> Lambda processing time.
-                await sleep(3000);
-
-                await loadDocuments();
-
-            }
-            catch (error) {
-
-                console.error(
-                    "Replacement error:",
-                    error
-                );
-
-                alert(
-                    "Replacement failed: " +
-                    error.message
-                );
-
-            }
-
-        };
-
-    input.click();
-
-}
-
-
-// ============================================================
-// 26. TEXT FILE EDITOR
-// ============================================================
-
-async function editTextDocument(
+async function openEditModal(
     documentId,
     fileName,
     fileType
-) {
-
-    if (
-        !isTextFile(
-            fileName,
-            fileType
-        )
-    ) {
-
-        alert(
-            "This file cannot be edited as text."
-        );
-
-        return;
-
-    }
-
-    try {
-
-        const response =
-            await authenticatedFetch(
-                DOWNLOAD_URL_API +
-                "/" +
-                encodeURIComponent(
-                    documentId
-                ) +
-                "/download-url",
-                {
-
-                    method: "GET"
-
-                }
-            );
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Could not get download URL."
-            );
-
-        }
-
-        const data =
-            await response.json();
-
-        const fileResponse =
-            await fetch(
-                data.downloadUrl
-            );
-
-        if (!fileResponse.ok) {
-
-            throw new Error(
-                "Could not download text file."
-            );
-
-        }
-
-        const text =
-            await fileResponse.text();
-
-        openTextEditor(
-            documentId,
-            fileName,
-            text
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "Text edit error:",
-            error
-        );
-
-        alert(
-            "Unable to open text file: " +
-            error.message
-        );
-
-    }
-
-}
-
-
-// ============================================================
-// 27. OPEN TEXT EDITOR
-// ============================================================
-
-function openTextEditor(
-    documentId,
-    fileName,
-    content
 ) {
 
     const modal =
@@ -1855,53 +1525,211 @@ function openTextEditor(
             "editModal"
         );
 
-    const textarea =
+    const documentIdInput =
         document.getElementById(
-            "editTextArea"
+            "editDocumentId"
         );
 
-    const title =
+    const fileNameInput =
         document.getElementById(
             "editFileName"
         );
 
-    if (!modal || !textarea) {
+    const replaceFile =
+        document.getElementById(
+            "replaceFile"
+        );
+
+    const textEditorSection =
+        document.getElementById(
+            "textEditorSection"
+        );
+
+    const textEditor =
+        document.getElementById(
+            "textEditor"
+        );
+
+    const editStatus =
+        document.getElementById(
+            "editStatus"
+        );
+
+    const replacementInfo =
+        document.getElementById(
+            "replacementInfo"
+        );
+
+    if (!modal) {
 
         alert(
-            "Text editor UI not found in index.html."
+            "Edit modal not found."
         );
 
         return;
 
     }
 
-    if (title) {
+    if (documentIdInput) {
 
-        title.textContent =
+        documentIdInput.value =
+            documentId;
+
+    }
+
+    if (fileNameInput) {
+
+        fileNameInput.value =
             fileName;
 
     }
 
-    textarea.value =
-        content;
+    if (replaceFile) {
 
-    modal.dataset.documentId =
-        documentId;
+        replaceFile.value = "";
 
-    modal.dataset.fileName =
-        fileName;
+    }
 
-    modal.style.display =
-        "block";
+    if (replacementInfo) {
+
+        replacementInfo.textContent =
+            "";
+
+    }
+
+    if (editStatus) {
+
+        editStatus.textContent =
+            "";
+
+    }
+
+    // --------------------------------------------------------
+    // TEXT FILE
+    // --------------------------------------------------------
+
+    if (
+        isTextFile(
+            fileName,
+            fileType
+        )
+    ) {
+
+        if (textEditorSection) {
+
+            textEditorSection.style.display =
+                "block";
+
+        }
+
+        if (textEditor) {
+
+            textEditor.value =
+                "Loading file content...";
+
+        }
+
+        modal.style.display =
+            "flex";
+
+        try {
+
+            const response =
+                await authenticatedFetch(
+                    DOWNLOAD_URL_API +
+                    "/" +
+                    encodeURIComponent(
+                        documentId
+                    ) +
+                    "/download-url",
+                    {
+
+                        method: "GET"
+
+                    }
+                );
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Could not get download URL."
+                );
+
+            }
+
+            const data =
+                await response.json();
+
+            const fileResponse =
+                await fetch(
+                    data.downloadUrl
+                );
+
+            if (!fileResponse.ok) {
+
+                throw new Error(
+                    "Could not download text file."
+                );
+
+            }
+
+            const text =
+                await fileResponse.text();
+
+            if (textEditor) {
+
+                textEditor.value =
+                    text;
+
+            }
+
+        }
+        catch (error) {
+
+            console.error(
+                "Text loading error:",
+                error
+            );
+
+            if (textEditor) {
+
+                textEditor.value =
+                    "";
+
+            }
+
+            if (editStatus) {
+
+                editStatus.textContent =
+                    "Could not load text content.";
+
+            }
+
+        }
+
+    }
+    else {
+
+        if (textEditorSection) {
+
+            textEditorSection.style.display =
+                "none";
+
+        }
+
+        modal.style.display =
+            "flex";
+
+    }
 
 }
 
 
 // ============================================================
-// 28. CLOSE TEXT EDITOR
+// 24. CLOSE EDIT MODAL
 // ============================================================
 
-function closeTextEditor() {
+function closeEditModal() {
 
     const modal =
         document.getElementById(
@@ -1919,55 +1747,74 @@ function closeTextEditor() {
 
 
 // ============================================================
-// 29. SAVE TEXT EDITOR
+// 25. SAVE DOCUMENT CHANGES
 // ============================================================
 
-async function saveTextDocument() {
+async function saveDocumentChanges() {
 
-    const modal =
+    const documentIdInput =
         document.getElementById(
-            "editModal"
+            "editDocumentId"
         );
 
-    const textarea =
+    const fileNameInput =
         document.getElementById(
-            "editTextArea"
+            "editFileName"
         );
 
-    if (!modal || !textarea) {
+    const replaceFile =
+        document.getElementById(
+            "replaceFile"
+        );
+
+    const textEditorSection =
+        document.getElementById(
+            "textEditorSection"
+        );
+
+    const textEditor =
+        document.getElementById(
+            "textEditor"
+        );
+
+    const editStatus =
+        document.getElementById(
+            "editStatus"
+        );
+
+    if (
+        !documentIdInput ||
+        !fileNameInput
+    ) {
+
+        alert(
+            "Edit fields not found."
+        );
 
         return;
 
     }
 
     const documentId =
-        modal.dataset.documentId;
+        documentIdInput.value.trim();
 
-    const fileName =
-        modal.dataset.fileName;
+    const newFileName =
+        fileNameInput.value.trim();
 
     if (!documentId) {
 
         alert(
-            "Document ID not found."
+            "Document ID is missing."
         );
 
         return;
 
     }
 
-    const content =
-        textarea.value;
-
-    if (
-        new Blob(
-            [content]
-        ).size >
-        2 * 1024 * 1024
-    ) {
+    if (!newFileName) {
 
         alert(
-            "Text file cannot exceed 2 MB."
+            "File name cannot be empty."
         );
 
         return;
@@ -1976,23 +1823,345 @@ async function saveTextDocument() {
 
     try {
 
-        // ----------------------------------------------------
-        // STEP 1:
-        // Get replacement URL from API Gateway.
-        // This request needs Cognito token.
-        // ----------------------------------------------------
+        if (editStatus) {
 
-        const response =
+            editStatus.textContent =
+                "Saving changes...";
+
+        }
+
+        // ====================================================
+        // STEP 1: REPLACE FILE IF SELECTED
+        // ====================================================
+
+        if (
+            replaceFile &&
+            replaceFile.files.length > 0
+        ) {
+
+            const file =
+                replaceFile.files[0];
+
+            if (editStatus) {
+
+                editStatus.textContent =
+                    "Generating replacement URL...";
+            }
+
+            const replacementResponse =
+                await authenticatedFetch(
+                    UPDATE_DOCUMENT_API +
+                    "/" +
+                    encodeURIComponent(
+                        documentId
+                    ) +
+                    "/update-url",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json"
+
+                        },
+
+                        body:
+                            JSON.stringify(
+                                {
+
+                                    contentType:
+                                        file.type ||
+                                        "application/octet-stream"
+
+                                }
+                            )
+
+                    }
+                );
+
+            if (
+                replacementResponse.status ===
+                401
+            ) {
+
+                handleUnauthorized();
+
+                return;
+
+            }
+
+            if (
+                replacementResponse.status ===
+                403
+            ) {
+
+                alert(
+                    "You are not authorized to replace this document."
+                );
+
+                return;
+
+            }
+
+            if (!replacementResponse.ok) {
+
+                const errorText =
+                    await replacementResponse.text();
+
+                throw new Error(
+                    "Replacement URL request failed: " +
+                    replacementResponse.status +
+                    " " +
+                    errorText
+                );
+
+            }
+
+            const replacementData =
+                await replacementResponse.json();
+
+            if (
+                !replacementData.uploadUrl
+            ) {
+
+                throw new Error(
+                    "Replacement URL was not returned."
+                );
+
+            }
+
+            if (editStatus) {
+
+                editStatus.textContent =
+                    "Uploading replacement to S3...";
+
+            }
+
+            // ------------------------------------------------
+            // DIRECT S3 UPLOAD
+            // ------------------------------------------------
+
+            const s3Response =
+                await fetch(
+                    replacementData.uploadUrl,
+                    {
+
+                        method: "PUT",
+
+                        headers: {
+
+                            "Content-Type":
+                                file.type ||
+                                "application/octet-stream"
+
+                        },
+
+                        body: file
+
+                    }
+                );
+
+            if (!s3Response.ok) {
+
+                throw new Error(
+                    "S3 replacement upload failed: " +
+                    s3Response.status
+                );
+
+            }
+
+            if (editStatus) {
+
+                editStatus.textContent =
+                    "Replacement uploaded successfully.";
+
+            }
+
+            // Give S3 -> Lambda processing some time.
+            await sleep(3000);
+
+        }
+
+
+        // ====================================================
+        // STEP 2: SAVE TEXT CONTENT
+        // ====================================================
+
+        if (
+            textEditorSection &&
+            textEditorSection.style.display !== "none" &&
+            textEditor
+        ) {
+
+            const content =
+                textEditor.value;
+
+            const contentSize =
+                new Blob(
+                    [content]
+                ).size;
+
+            if (
+                contentSize >
+                2 * 1024 * 1024
+            ) {
+
+                throw new Error(
+                    "Text file cannot exceed 2 MB."
+                );
+
+            }
+
+            if (editStatus) {
+
+                editStatus.textContent =
+                    "Saving text content...";
+
+            }
+
+            const textContentType =
+                getTextContentType(
+                    newFileName
+                );
+
+            const textResponse =
+                await authenticatedFetch(
+                    UPDATE_DOCUMENT_API +
+                    "/" +
+                    encodeURIComponent(
+                        documentId
+                    ) +
+                    "/update-url",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json"
+
+                        },
+
+                        body:
+                            JSON.stringify(
+                                {
+
+                                    contentType:
+                                        textContentType
+
+                                }
+                            )
+
+                    }
+                );
+
+            if (
+                textResponse.status ===
+                401
+            ) {
+
+                handleUnauthorized();
+
+                return;
+
+            }
+
+            if (
+                textResponse.status ===
+                403
+            ) {
+
+                alert(
+                    "You are not authorized to update this document."
+                );
+
+                return;
+
+            }
+
+            if (!textResponse.ok) {
+
+                const errorText =
+                    await textResponse.text();
+
+                throw new Error(
+                    "Could not generate text replacement URL: " +
+                    textResponse.status +
+                    " " +
+                    errorText
+                );
+
+            }
+
+            const textData =
+                await textResponse.json();
+
+            if (!textData.uploadUrl) {
+
+                throw new Error(
+                    "Text replacement URL missing."
+                );
+
+            }
+
+            const textUploadResponse =
+                await fetch(
+                    textData.uploadUrl,
+                    {
+
+                        method: "PUT",
+
+                        headers: {
+
+                            "Content-Type":
+                                textContentType
+
+                        },
+
+                        body:
+                            content
+
+                    }
+                );
+
+            if (!textUploadResponse.ok) {
+
+                throw new Error(
+                    "S3 text upload failed: " +
+                    textUploadResponse.status
+                );
+
+            }
+
+            await sleep(3000);
+
+        }
+
+
+        // ====================================================
+        // STEP 3: RENAME DOCUMENT
+        // ====================================================
+
+        if (editStatus) {
+
+            editStatus.textContent =
+                "Updating file name...";
+
+        }
+
+        const renameResponse =
             await authenticatedFetch(
                 UPDATE_DOCUMENT_API +
                 "/" +
                 encodeURIComponent(
                     documentId
-                ) +
-                "/update-url",
+                ),
                 {
 
-                    method: "POST",
+                    method: "PUT",
 
                     headers: {
 
@@ -2001,86 +2170,69 @@ async function saveTextDocument() {
 
                     },
 
-                    body: JSON.stringify({
+                    body:
+                        JSON.stringify(
+                            {
 
-                        contentType:
-                            getTextContentType(
-                                fileName
-                            )
+                                fileName:
+                                    newFileName
 
-                    })
+                            }
+                        )
 
                 }
             );
 
-        if (!response.ok) {
+        if (
+            renameResponse.status ===
+            401
+        ) {
+
+            handleUnauthorized();
+
+            return;
+
+        }
+
+        if (
+            renameResponse.status ===
+            403
+        ) {
+
+            alert(
+                "You are not authorized to rename this document."
+            );
+
+            return;
+
+        }
+
+        if (!renameResponse.ok) {
 
             const errorText =
-                await response.text();
+                await renameResponse.text();
 
             throw new Error(
-                "Could not generate replacement URL: " +
-                response.status +
+                "Rename failed: " +
+                renameResponse.status +
                 " " +
                 errorText
             );
 
         }
 
-        const data =
-            await response.json();
+        if (editStatus) {
 
-        if (!data.uploadUrl) {
-
-            throw new Error(
-                "Replacement URL missing."
-            );
+            editStatus.textContent =
+                "Changes saved successfully.";
 
         }
-
-        // ----------------------------------------------------
-        // STEP 2:
-        // Upload directly to S3.
-        // No Authorization header.
-        // ----------------------------------------------------
-
-        const uploadResponse =
-            await fetch(
-                data.uploadUrl,
-                {
-
-                    method: "PUT",
-
-                    headers: {
-
-                        "Content-Type":
-                            getTextContentType(
-                                fileName
-                            )
-
-                    },
-
-                    body: content
-
-                }
-            );
-
-        if (!uploadResponse.ok) {
-
-            throw new Error(
-                "S3 upload failed: " +
-                uploadResponse.status
-            );
-
-        }
-
-        closeTextEditor();
 
         alert(
-            "Text document saved successfully."
+            "Document updated successfully."
         );
 
-        await sleep(3000);
+        closeEditModal();
 
         await loadDocuments();
 
@@ -2088,12 +2240,20 @@ async function saveTextDocument() {
     catch (error) {
 
         console.error(
-            "Save text error:",
+            "Save changes error:",
             error
         );
 
+        if (editStatus) {
+
+            editStatus.textContent =
+                "Error: " +
+                error.message;
+
+        }
+
         alert(
-            "Could not save document: " +
+            "Could not save changes: " +
             error.message
         );
 
@@ -2103,7 +2263,26 @@ async function saveTextDocument() {
 
 
 // ============================================================
-// 30. CHECK TEXT FILE
+// 26. TEXT DOCUMENT QUICK EDIT
+// ============================================================
+
+async function editTextDocument(
+    documentId,
+    fileName,
+    fileType
+) {
+
+    await openEditModal(
+        documentId,
+        fileName,
+        fileType
+    );
+
+}
+
+
+// ============================================================
+// 27. TEXT FILE DETECTION
 // ============================================================
 
 function isTextFile(
@@ -2113,7 +2292,9 @@ function isTextFile(
 
     if (
         fileType &&
-        fileType.startsWith("text/")
+        fileType.startsWith(
+            "text/"
+        )
     ) {
 
         return true;
@@ -2133,6 +2314,7 @@ function isTextFile(
         "json",
         "xml",
         "html",
+        "htm",
         "css",
         "js",
         "java",
@@ -2140,6 +2322,7 @@ function isTextFile(
         "c",
         "cpp",
         "h",
+        "hpp",
         "md",
         "log"
 
@@ -2153,7 +2336,7 @@ function isTextFile(
 
 
 // ============================================================
-// 31. GET TEXT CONTENT TYPE
+// 28. TEXT CONTENT TYPE
 // ============================================================
 
 function getTextContentType(
@@ -2168,33 +2351,53 @@ function getTextContentType(
 
     const contentTypes = {
 
-        txt: "text/plain",
+        txt:
+            "text/plain",
 
-        csv: "text/csv",
+        csv:
+            "text/csv",
 
-        json: "application/json",
+        json:
+            "application/json",
 
-        xml: "application/xml",
+        xml:
+            "application/xml",
 
-        html: "text/html",
+        html:
+            "text/html",
 
-        css: "text/css",
+        htm:
+            "text/html",
 
-        js: "text/javascript",
+        css:
+            "text/css",
 
-        java: "text/plain",
+        js:
+            "text/javascript",
 
-        py: "text/plain",
+        java:
+            "text/plain",
 
-        c: "text/plain",
+        py:
+            "text/plain",
 
-        cpp: "text/plain",
+        c:
+            "text/plain",
 
-        h: "text/plain",
+        cpp:
+            "text/plain",
 
-        md: "text/markdown",
+        h:
+            "text/plain",
 
-        log: "text/plain"
+        hpp:
+            "text/plain",
+
+        md:
+            "text/markdown",
+
+        log:
+            "text/plain"
 
     };
 
@@ -2207,7 +2410,7 @@ function getTextContentType(
 
 
 // ============================================================
-// 32. FORMAT FILE SIZE
+// 29. FORMAT FILE SIZE
 // ============================================================
 
 function formatFileSize(
@@ -2226,6 +2429,14 @@ function formatFileSize(
 
     bytes =
         Number(bytes);
+
+    if (
+        Number.isNaN(bytes)
+    ) {
+
+        return "Unknown";
+
+    }
 
     if (bytes === 0) {
 
@@ -2266,7 +2477,7 @@ function formatFileSize(
 
 
 // ============================================================
-// 33. ESCAPE HTML
+// 30. ESCAPE HTML
 // ============================================================
 
 function escapeHtml(
@@ -2308,7 +2519,7 @@ function escapeHtml(
 
 
 // ============================================================
-// 34. ESCAPE JAVASCRIPT
+// 31. ESCAPE JAVASCRIPT
 // ============================================================
 
 function escapeJs(
@@ -2350,7 +2561,7 @@ function escapeJs(
 
 
 // ============================================================
-// 35. SLEEP
+// 32. SLEEP
 // ============================================================
 
 function sleep(
@@ -2372,45 +2583,54 @@ function sleep(
 
 
 // ============================================================
-// 36. HANDLE API AUTH ERRORS
+// 33. HANDLE UNAUTHORIZED
 // ============================================================
 
-async function handleApiResponse(
-    response
-) {
+function handleUnauthorized() {
 
-    if (
-        response.status ===
-        401
-    ) {
+    console.log(
+        "401 Unauthorized."
+    );
 
-        console.log(
-            "401 Unauthorized"
-        );
+    const user =
+        getCurrentUser();
 
-        logoutUser();
+    if (user) {
 
-        alert(
-            "Your login session has expired. Please login again."
-        );
-
-        return false;
+        user.signOut();
 
     }
 
-    if (
-        response.status ===
-        403
-    ) {
+    showLogin();
 
-        alert(
-            "You are not authorized to perform this action."
-        );
-
-        return false;
-
-    }
-
-    return true;
+    alert(
+        "Your login session has expired. Please login again."
+    );
 
 }
+
+
+// ============================================================
+// 34. CLOSE MODAL WHEN CLICKING OUTSIDE
+// ============================================================
+
+window.addEventListener(
+    "click",
+    function (event) {
+
+        const modal =
+            document.getElementById(
+                "editModal"
+            );
+
+        if (
+            modal &&
+            event.target === modal
+        ) {
+
+            closeEditModal();
+
+        }
+
+    }
+);

@@ -81,64 +81,61 @@ function getCurrentUser() {
 // 5. GET COGNITO ACCESS TOKEN
 // ============================================================
 
+// ============================================================
+// GET ACCESS TOKEN
+// ============================================================
+
 function getAccessToken() {
 
-    return new Promise(
-        function (resolve, reject) {
+    const accessToken =
+        localStorage.getItem("accessToken");
 
-            const user =
-                getCurrentUser();
+    if (!accessToken) {
 
-            if (!user) {
+        throw new Error(
+            "User is not logged in."
+        );
+    }
 
-                reject(
-                    new Error(
-                        "User is not logged in."
-                    )
-                );
+    const expiresAt =
+        Number(
+            localStorage.getItem(
+                "tokenExpiresAt"
+            )
+        );
 
-                return;
-            }
+    // Token expired
+    if (
+        expiresAt &&
+        Date.now() >= expiresAt
+    ) {
 
-            user.getSession(
-                function (error, session) {
+        console.log(
+            "Access token expired."
+        );
 
-                    if (error) {
+        localStorage.removeItem(
+            "accessToken"
+        );
 
-                        reject(error);
+        localStorage.removeItem(
+            "idToken"
+        );
 
-                        return;
+        localStorage.removeItem(
+            "refreshToken"
+        );
 
-                    }
+        localStorage.removeItem(
+            "tokenExpiresAt"
+        );
 
-                    if (
-                        !session ||
-                        !session.isValid()
-                    ) {
+        throw new Error(
+            "Session expired. Please login again."
+        );
+    }
 
-                        reject(
-                            new Error(
-                                "Login session has expired."
-                            )
-                        );
-
-                        return;
-
-                    }
-
-                    const token =
-                        session
-                            .getAccessToken()
-                            .getJwtToken();
-
-                    resolve(token);
-
-                }
-            );
-
-        }
-    );
-
+    return accessToken;
 }
 
 

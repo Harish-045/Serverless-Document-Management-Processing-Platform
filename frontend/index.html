@@ -21,26 +21,150 @@
 
 <body>
 
-<div class="container">
+<!-- ========================================================= -->
+<!-- AUTHENTICATION -->
+<!-- ========================================================= -->
 
-    <!-- ===================================================== -->
+<section id="authSection" class="auth-card">
+
+    <h2>Cloud Document Platform</h2>
+
+    <p>Login to manage your documents securely.</p>
+
+    <div id="authMessage"></div>
+
+
+    <!-- LOGIN -->
+
+    <div id="loginForm">
+
+        <input
+                type="email"
+                id="loginEmail"
+                placeholder="Email"
+                autocomplete="email"
+        >
+
+        <input
+                type="password"
+                id="loginPassword"
+                placeholder="Password"
+                autocomplete="current-password"
+        >
+
+        <button onclick="loginUser()">
+            Login
+        </button>
+
+        <button
+                type="button"
+                onclick="showSignup()"
+        >
+            Create Account
+        </button>
+
+    </div>
+
+
+    <!-- SIGN UP -->
+
+    <div
+            id="signupForm"
+            style="display:none;"
+    >
+
+        <input
+                type="email"
+                id="signupEmail"
+                placeholder="Email"
+                autocomplete="email"
+        >
+
+        <input
+                type="password"
+                id="signupPassword"
+                placeholder="Password"
+                autocomplete="new-password"
+        >
+
+        <button onclick="signupUser()">
+            Sign Up
+        </button>
+
+        <button
+                type="button"
+                onclick="showLogin()"
+        >
+            Back to Login
+        </button>
+
+    </div>
+
+
+    <!-- EMAIL VERIFICATION -->
+
+    <div
+            id="verificationForm"
+            style="display:none;"
+    >
+
+        <p>
+            Check your email for the verification code.
+        </p>
+
+        <input
+                type="text"
+                id="verificationCode"
+                placeholder="Verification code"
+        >
+
+        <button onclick="confirmSignup()">
+            Verify Email
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================= -->
+<!-- MAIN APPLICATION -->
+<!-- ========================================================= -->
+
+<div
+        id="appSection"
+        class="container"
+        style="display:none;"
+>
+
     <!-- HEADER -->
-    <!-- ===================================================== -->
 
     <header>
 
-        <h1>
-            Cloud Document Platform
-        </h1>
+        <div>
 
-        <p>
-            Upload, manage and update your documents securely.
-        </p>
+            <h1>
+                Cloud Document Platform
+            </h1>
 
-        <!-- CI/CD TEST MESSAGE -->
-        <p>
-            🚀 Automatically deployed using Docker + GitHub Actions
-        </p>
+            <p>
+                Upload, manage and update your documents securely.
+            </p>
+
+            <p>
+                🚀 Automatically deployed using Docker + GitHub Actions
+            </p>
+
+            <p id="loggedInUser"></p>
+
+        </div>
+
+        <button
+                class="logout-button"
+                onclick="logoutUser()"
+        >
+            Logout
+        </button>
 
     </header>
 
@@ -125,8 +249,6 @@
 
     <div class="modal">
 
-        <!-- MODAL HEADER -->
-
         <div class="modal-header">
 
             <h2>
@@ -143,19 +265,13 @@
         </div>
 
 
-        <!-- MODAL BODY -->
-
         <div class="modal-body">
-
-            <!-- DOCUMENT ID -->
 
             <input
                     type="hidden"
                     id="editDocumentId"
             >
 
-
-            <!-- FILE NAME -->
 
             <label for="editFileName">
                 File Name
@@ -171,8 +287,6 @@
                 Rename the document without changing its contents.
             </p>
 
-
-            <!-- REPLACE FILE -->
 
             <div class="replace-section">
 
@@ -199,8 +313,6 @@
             </div>
 
 
-            <!-- TEXT EDITOR -->
-
             <div
                     id="textEditorSection"
                     class="text-editor-section"
@@ -222,8 +334,6 @@
             </div>
 
 
-            <!-- STATUS -->
-
             <div
                     id="editStatus"
                     class="edit-status"
@@ -231,8 +341,6 @@
 
         </div>
 
-
-        <!-- MODAL ACTIONS -->
 
         <div class="modal-actions">
 
@@ -257,6 +365,12 @@
 
 </div>
 
+
+<!-- ========================================================= -->
+<!-- COGNITO JAVASCRIPT SDK -->
+<!-- ========================================================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6.3.12/dist/amazon-cognito-identity.min.js"></script>
 
 <script src="app.js"></script>
 

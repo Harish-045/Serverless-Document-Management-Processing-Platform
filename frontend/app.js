@@ -349,106 +349,53 @@ function loginUser() {
 
 function signupUser() {
 
-    const emailInput =
-        document.getElementById(
-            "signupEmail"
-        );
+    const name = document.getElementById("signupName").value.trim();
+    const email = document.getElementById("signupEmail").value.trim();
+    const password = document.getElementById("signupPassword").value;
 
-    const passwordInput =
-        document.getElementById(
-            "signupPassword"
-        );
-
-    if (
-        !emailInput ||
-        !passwordInput
-    ) {
-
-        alert(
-            "Signup fields not found."
-        );
-
+    if (!name || !email || !password) {
+        alert("Please fill all fields.");
         return;
-
     }
 
-    const email =
-        emailInput.value.trim();
+    const attributeList = [];
 
-    const password =
-        passwordInput.value;
+    attributeList.push(
+        new AmazonCognitoIdentity.CognitoUserAttribute({
+            Name: "email",
+            Value: email
+        })
+    );
 
-    if (!email || !password) {
-
-        alert(
-            "Please enter email and password."
-        );
-
-        return;
-
-    }
-
-    if (password.length < 8) {
-
-        alert(
-            "Password must contain at least 8 characters."
-        );
-
-        return;
-
-    }
-
-    const emailAttribute =
-        new AmazonCognitoIdentity.CognitoUserAttribute(
-            {
-                Name: "email",
-                Value: email
-            }
-        );
-
-    console.log(
-        "Creating Cognito account..."
+    attributeList.push(
+        new AmazonCognitoIdentity.CognitoUserAttribute({
+            Name: "name",
+            Value: name
+        })
     );
 
     userPool.signUp(
         email,
         password,
-        [emailAttribute],
+        attributeList,
         null,
-        function (error, result) {
+        function(err, result) {
 
-            if (error) {
-
-                console.error(
-                    "Signup failed:",
-                    error
-                );
-
-                alert(
-                    error.message ||
-                    "Signup failed."
-                );
-
+            if (err) {
+                console.error("Signup failed:", err);
+                alert(err.message || "Signup failed.");
                 return;
-
             }
 
-            pendingSignupEmail =
-                email;
-
-            console.log(
-                "Signup successful."
-            );
+            console.log("Signup successful:", result);
 
             alert(
-                "Account created. Check your email for the verification code."
+                "Signup successful! Please check your email for the verification code."
             );
 
             showVerification();
-
         }
     );
-
 }
 
 

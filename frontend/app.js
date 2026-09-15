@@ -231,117 +231,183 @@ function checkAuthentication() {
 // 8. LOGIN
 // ============================================================
 
-function loginUser() {
+// ============================================================
+// 8. LOGIN
+// ============================================================
+
+async function loginUser() {
 
     const emailInput =
-        document.getElementById(
-            "loginEmail"
-        );
+        document.getElementById("loginEmail");
 
     const passwordInput =
-        document.getElementById(
-            "loginPassword"
-        );
+        document.getElementById("loginPassword");
 
-    if (
-        !emailInput ||
-        !passwordInput
-    ) {
+    if (!emailInput || !passwordInput) {
 
-        alert(
-            "Login fields not found."
-        );
-
+        alert("Login fields not found.");
         return;
-
     }
 
     const email =
-        emailInput.value.trim();
+        emailInput.value.trim().toLowerCase();
 
     const password =
         passwordInput.value;
 
     if (!email || !password) {
 
-        alert(
-            "Please enter email and password."
-        );
-
+        alert("Please enter email and password.");
         return;
-
     }
 
-    const authenticationDetails =
-        new AmazonCognitoIdentity.AuthenticationDetails(
-            {
-                Username: email,
-                Password: password
-            }
-        );
+    console.log("Logging in with Cognito...");
 
-    const cognitoUser =
-        new AmazonCognitoIdentity.CognitoUser(
-            {
-                Username: email,
-                Pool: userPool
-            }
-        );
+    try {
 
-    console.log(
-        "Logging in..."
-    );
+        const response =
+            await fetch(
+                "https://cognito-idp.ap-south-1.amazonaws.com/",
+                {
+                    method: "POST",
 
-    cognitoUser.authenticateUser(
-        authenticationDetails,
-        {
+                    headers: {
+                        "Content-Type":
+                            "application/x-amz-json-1.1",
 
-            onSuccess:
-                function (session) {
+                        "X-Amz-Target":
+                            "AWSCognitoIdentityProviderService.InitiateAuth"
+                    },
 
-                    console.log(
-                        "Login successful."
-                    );
+                    body: JSON.stringify({
 
-                    console.log(
-                        "Access token received."
-                    );
+                        AuthFlow:
+                            "USER_PASSWORD_AUTH",
 
-                    showApplication(
-                        cognitoUser
-                    );
+                        ClientId:
+                            COGNITO_CLIENT_ID,
 
-                },
+                        AuthParameters: {
 
-            onFailure:
-                function (error) {
+                            USERNAME:
+                                email,
 
-                    console.error(
-                        "Login failed:",
-                        error
-                    );
-
-                    alert(
-                        error.message ||
-                        "Login failed."
-                    );
-
-                },
-
-            newPasswordRequired:
-                function () {
-
-                    alert(
-                        "A new password is required."
-                    );
-
+                            PASSWORD:
+                                password
+                        }
+                    })
                 }
+            );
 
+        const data =
+            await response.json();
+
+        console.log(
+            "Cognito response:",
+            data
+        );
+
+        if (!response.ok) {
+
+            console.error(
+                "Cognito login failed:",
+                data
+            );
+
+            alert(
+                data.message ||
+                "Login failed."
+            );
+
+            return;
         }
-    );
 
+        // ----------------------------------------------------
+        // Check for authentication result
+        // ----------------------------------------------------
+
+        if (!data.AuthenticationResult) {
+
+            console.error(
+                "No AuthenticationResult:",
+                data
+            );
+
+            alert(
+                "Authentication did not complete."
+            );
+
+            return;
+        }
+
+        const accessToken =
+            data.AuthenticationResult.AccessToken;
+
+        const idToken =
+            data.AuthenticationResult.IdToken;
+
+        const refreshToken =
+            data.AuthenticationResult.RefreshToken;
+
+        const expiresIn =
+            data.AuthenticationResult.ExpiresIn;
+
+        // ----------------------------------------------------
+        // Store tokens
+        // ----------------------------------------------------
+
+        localStorage.setItem(
+            "accessToken",
+            accessToken
+        );
+
+        localStorage.setItem(
+            "idToken",
+            idToken
+        );
+
+        if (refreshToken) {
+
+            localStorage.setItem(
+                "refreshToken",
+                refreshToken
+            );
+        }
+
+        localStorage.setItem(
+            "tokenExpiresAt",
+            String(
+                Date.now() +
+                (expiresIn * 1000)
+            )
+        );
+
+        console.log(
+            "Login successful."
+        );
+
+        console.log(
+            "Access token received."
+        );
+
+        // ----------------------------------------------------
+        // Show application
+        // ----------------------------------------------------
+
+        showApplication();
+
+    } catch (error) {
+
+        console.error(
+            "Login request failed:",
+            error
+        );
+
+        alert(
+            "Unable to connect to Cognito."
+        );
+    }
 }
-
 
 // ============================================================
 // 9. SIGN UP

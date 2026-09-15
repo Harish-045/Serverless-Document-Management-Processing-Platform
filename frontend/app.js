@@ -347,19 +347,50 @@ function loginUser() {
 // 9. SIGN UP
 // ============================================================
 
+// ============================================================
+// 9. SIGN UP
+// ============================================================
+
 function signupUser() {
 
-    const name = document.getElementById("signupName").value.trim();
-    const email = document.getElementById("signupEmail").value.trim();
-    const password = document.getElementById("signupPassword").value;
+    const nameInput =
+        document.getElementById("signupName");
+
+    const emailInput =
+        document.getElementById("signupEmail");
+
+    const passwordInput =
+        document.getElementById("signupPassword");
+
+    if (!nameInput || !emailInput || !passwordInput) {
+
+        alert("Signup fields not found.");
+        return;
+    }
+
+    const name =
+        nameInput.value.trim();
+
+    const email =
+        emailInput.value.trim().toLowerCase();
+
+    const password =
+        passwordInput.value;
 
     if (!name || !email || !password) {
+
         alert("Please fill all fields.");
         return;
     }
 
+    // IMPORTANT:
+    // Save the email so confirmSignup() knows
+    // which Cognito user must be verified.
+    pendingSignupEmail = email;
+
     const attributeList = [];
 
+    // Email attribute
     attributeList.push(
         new AmazonCognitoIdentity.CognitoUserAttribute({
             Name: "email",
@@ -367,6 +398,7 @@ function signupUser() {
         })
     );
 
+    // Name attribute
     attributeList.push(
         new AmazonCognitoIdentity.CognitoUserAttribute({
             Name: "name",
@@ -374,31 +406,58 @@ function signupUser() {
         })
     );
 
+    console.log("Creating Cognito user...");
+    console.log("Signup email:", email);
+
     userPool.signUp(
         email,
         password,
         attributeList,
         null,
+
         function(err, result) {
 
             if (err) {
-                console.error("Signup failed:", err);
-                alert(err.message || "Signup failed.");
+
+                console.error(
+                    "Signup failed:",
+                    err
+                );
+
+                alert(
+                    err.message ||
+                    "Signup failed."
+                );
+
                 return;
             }
 
-            console.log("Signup successful:", result);
+            console.log(
+                "Signup successful:",
+                result
+            );
+
+            // Make sure we use the actual Cognito username
+            if (result && result.user) {
+
+                pendingSignupEmail =
+                    result.user.getUsername();
+
+                console.log(
+                    "Cognito username:",
+                    pendingSignupEmail
+                );
+            }
 
             alert(
-                "Signup successful! Please check your email for the verification code."
+                "Signup successful! " +
+                "Please check your email for the verification code."
             );
 
             showVerification();
         }
     );
 }
-
-
 // ============================================================
 // 10. VERIFY EMAIL
 // ============================================================
